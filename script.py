@@ -9,7 +9,9 @@ columns_map = {
     "avg_winr": 22,
     "avg_dd": 23,
     "high_dd": 24,
-    "std": 25
+    "std": 25,
+    "profit_std": 26,
+    "total_profit": 39
 }
 
 
@@ -23,15 +25,8 @@ def get_column_value(index, col_name, data, should_print=False):
     if should_print:
         print(index)
         print(col_name)
-
     return data.iloc[index - 1].iloc[columns_map[col_name]]
 
-
-def validate_row_at_index(per_year_per_pair, avg_winr, avg_dd, high_dd , std):
-    isTrue = True if per_year_per_pair >= 0 and avg_winr >= 69.99 and avg_dd >= 0 and high_dd >= 0 and std > 4999 else False
-    if isTrue:
-        print(True)
-    return isTrue
 
 # 5
 
@@ -39,15 +34,30 @@ def validate_row_at_index(per_year_per_pair, avg_winr, avg_dd, high_dd , std):
 def get_valid_rows(data, ex_file, valid_rows_pass):
     filterd_rows = []
     for index in valid_rows_pass:
+        # print_row(data.iloc[index - 1])
+
         per_year_per_pair = get_column_value(index,  "per_year_per_pair", data)
         avg_winr = get_column_value(index,  "avg_winr", data)
         avg_dd = get_column_value(index,  "avg_dd", data) * 100
         high_dd = get_column_value(index,  "high_dd", data) * 100
         std = get_column_value(index,  "std", data)
+        profit_std = get_column_value(index,  "profit_std", data)
+        total_profit = get_column_value(index,  "total_profit", data)
 
-        #print_row(per_year_per_pair, avg_winr, avg_dd, high_dd)
+        #print(profit_std)
 
-        if validate_row_at_index(per_year_per_pair, avg_winr, avg_dd, high_dd , std):
+        isValidPass = False
+        if per_year_per_pair >= 0:
+            if avg_winr >= 69.99:
+                if avg_dd >= 0:
+                    if high_dd >= 0:
+                        if std > 4999:
+                            if profit_std >= 1999:
+                                if total_profit >= 4999:
+                                    isValidPass = True
+
+        if isValidPass:
+            print(True)
             one_pass = get_column_value(index,  "pass", data)
             filterd_rows.append(one_pass)
 
@@ -56,7 +66,7 @@ def get_valid_rows(data, ex_file, valid_rows_pass):
 
 # 4
 def get_file_ending_row_index(data, ex_file):
-
+    # return 6
     ending_row_index = data.shape[0]
     for row_index in range(ending_row_index):
         sample_columns_value = data.iloc[row_index].iloc[columns_map["per_year_per_pair"]]
