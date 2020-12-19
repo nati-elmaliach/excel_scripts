@@ -2,6 +2,11 @@ from os import listdir
 from os.path import isfile, join
 import pandas as pd
 import math
+import operator
+from itertools import chain
+
+
+from ExcelReader.ExcelReader import ExeclReader
 
 columns_map = {
     "pass": 0,
@@ -13,6 +18,9 @@ columns_map = {
     "profit_std": 26,
     "total_profit": 39
 }
+
+
+MAX = 5000000000
 
 
 def print_row(*args):
@@ -44,7 +52,8 @@ def get_valid_rows(data, ex_file, valid_rows_pass):
         profit_std = get_column_value(index,  "profit_std", data)
         total_profit = get_column_value(index,  "total_profit", data)
 
-        #print(profit_std)
+        # print(profit_std)
+        print(get_column_value(index,  "pass", data))
 
         isValidPass = False
         if per_year_per_pair >= 0:
@@ -66,7 +75,6 @@ def get_valid_rows(data, ex_file, valid_rows_pass):
 
 # 4
 def get_file_ending_row_index(data, ex_file):
-    # return 6
     ending_row_index = data.shape[0]
     for row_index in range(ending_row_index):
         sample_columns_value = data.iloc[row_index].iloc[columns_map["per_year_per_pair"]]
@@ -101,12 +109,49 @@ def get_stdo_data(file_name):
 
 # 2
 def start(excel_files):
+
+    valid_passes = []
+
+    for excel_file in excel_files:
+        print("--------------------------")
+        print(excel_file)
+        print("--------------------------")
+
+        data = ExeclReader.get_df(excel_file)
+        data = ExeclReader.filter(data, "total_profit", operator.gt, 0)
+        data = ExeclReader.mid_filter(data, "std", operator.lt)
+        data = ExeclReader.mid_filter(data, "total_profit", operator.gt)
+        data = ExeclReader.get_col(data, "pass")
+        data = list(data)
+        data.sort()
+        print(data)
+        valid_passes.append(data)
+        print("--------------------------")
+
+    res_dict = {}
+    for arr in valid_passes:
+        for val in arr:
+            if val in res_dict:
+                res_dict[val] += 1
+            else:
+                res_dict[val] = 1
+
+    print("-----------RESULTS-----------")
+    for pass_num in res_dict:
+        if res_dict[pass_num] == 3:
+            print(pass_num)
+    print("-----------RESULTS-----------")
+
+    return
     one_excel_file = excel_files.pop()
     data, ending_row_index = get_stdo_data(one_excel_file)
+    print(ending_row_index)
+    print(data)
+    return
     valid_rows_pass = get_valid_rows(
         data, one_excel_file, [x for x in range(ending_row_index)])
 
-    print(valid_rows_pass)
+    # print(valid_rows_pass)
 
     if len(excel_files) > 0:
         for file_name in excel_files:
@@ -119,13 +164,12 @@ def start(excel_files):
 
 
 # 1
-
-
 def get_all_excels(files_list):
+    valid_files = []
     for index, file_name in enumerate(files_list):
-        if "xlsm" not in file_name:
-            files_list.pop(index)
-    return files_list
+        if "xlsm" in file_name:
+            valid_files.append(file_name)
+    return valid_files
 
 
 # 0
