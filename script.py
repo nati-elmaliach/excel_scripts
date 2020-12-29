@@ -107,6 +107,10 @@ def get_stdo_data(file_name):
     return data, ending_row_index
 
 
+def print_all_columns_names(data):
+    print_row(data.columns.values)
+
+
 # 2
 def start(excel_files):
 
@@ -118,13 +122,19 @@ def start(excel_files):
         print("--------------------------")
 
         data = ExeclReader.get_df(excel_file)
+        # print_all_columns_names(data)
+
         data = ExeclReader.filter(data, "total_profit", operator.gt, 0)
         data = ExeclReader.mid_filter(data, "std", operator.lt)
         data = ExeclReader.mid_filter(data, "total_profit", operator.gt)
+        data.to_excel("RESULTS-XLSX.xlsx")
+        return
         data = ExeclReader.get_col(data, "pass")
+        
         data = list(data)
         data.sort()
-        print(data)
+        print(len(data))
+        return
         valid_passes.append(data)
         print("--------------------------")
 
@@ -136,31 +146,17 @@ def start(excel_files):
             else:
                 res_dict[val] = 1
 
-    print("-----------RESULTS-----------")
+    # print the the reults, pass: number of hits
+    # print(res_dict)
+
+    valid_pass_numbers = []
     for pass_num in res_dict:
-        if res_dict[pass_num] == 3:
-            print(pass_num)
-    print("-----------RESULTS-----------")
+        if res_dict[pass_num] == len(excel_files):
+            # prits the results on one line
+            #print_row(pass_num)
+            valid_pass_numbers.append(pass_num)
 
-    return
-    one_excel_file = excel_files.pop()
-    data, ending_row_index = get_stdo_data(one_excel_file)
-    print(ending_row_index)
-    print(data)
-    return
-    valid_rows_pass = get_valid_rows(
-        data, one_excel_file, [x for x in range(ending_row_index)])
-
-    # print(valid_rows_pass)
-
-    if len(excel_files) > 0:
-        for file_name in excel_files:
-            data = get_stdo_data(file_name)[0]
-
-            valid_rows_pass = get_valid_rows(
-                data,  file_name, valid_rows_pass)
-
-            print(valid_rows_pass)
+    print(valid_pass_numbers)
 
 
 # 1
@@ -176,6 +172,7 @@ def get_all_excels(files_list):
 def main():
     all_files = [f for f in listdir("./") if isfile(join("./", f))]
     excel_files = get_all_excels(all_files)
+    print(excel_files)
     start(excel_files)
 
 

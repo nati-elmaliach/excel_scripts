@@ -3,8 +3,9 @@ import math
 
 columns_map = {
     "pass": "Standard Deviation Passes (Optimization)",
+    "std": "Unnamed: 25",
     "total_profit": "Unnamed: 39",
-    "std": "Unnamed: 25"
+    
 }
 
 
@@ -14,17 +15,22 @@ class ExeclReader:
     def get_df(file_name):
         # Reading the file will give us a dict
         dict_pd = pd.read_excel(file_name, sheet_name=None)["STDo"]
+
+        # print all columns of this excel file
+        print(dict_pd.columns.values)
+
         num_of_rows = dict_pd.shape[0]
 
         should_break = False
-        for i in range(0, num_of_rows):
-            total_profit = dict_pd.iloc[i][columns_map["total_profit"]]
+        for row_index in range(0, num_of_rows):
+
+            total_profit = dict_pd.iloc[row_index][columns_map["total_profit"]]
 
             if type(total_profit) is str:
                 should_break = True
 
             if type(total_profit) is float and should_break:
-                return dict_pd.iloc[i:]
+                return dict_pd.iloc[row_index:]
 
     @staticmethod
     def filter(df, col, relate, cut):
@@ -42,4 +48,8 @@ class ExeclReader:
 
     @staticmethod
     def get_col(df, col):
+        return df[columns_map[col]].values
+
+    @staticmethod
+    def get_row(df, col):
         return df[columns_map[col]].values
