@@ -8,15 +8,11 @@ from itertools import chain
 
 from ExcelReader.ExcelReader import ExeclReader
 
-columns_map = {
-    "pass": 0,
-    "per_year_per_pair": 21,
-    "avg_winr": 22,
-    "avg_dd": 23,
-    "high_dd": 24,
-    "std": 25,
-    "profit_std": 26,
-    "total_profit": 39
+
+columns_to_delete = {
+    "Unnamed: 9": "Unnamed: 20",
+    "Unnamed: 27": "Unnamed: 31",
+    "Unnamed: 33": "Unnamed: 37"
 }
 
 
@@ -127,10 +123,25 @@ def start(excel_files):
         data = ExeclReader.filter(data, "total_profit", operator.gt, 0)
         data = ExeclReader.mid_filter(data, "std", operator.lt)
         data = ExeclReader.mid_filter(data, "total_profit", operator.gt)
+
+        for key, value in columns_to_delete.items():
+            data.drop(
+                data.loc[:, key: value].columns, axis=1, inplace=True)
+
+        print(data.columns.values)
+
+        #  All new columns names, need to generate first 9 - 20
+        data.columns = ["Pass", "1", "2", "3", "4", "5", "6", "7", "8",
+                        "Per Year Per Pair", "AVG WINR", "AVG DD", "HIGH DD", "STD", "Profit STD" , "P.p (avg)" , "P.F(AVG)" , "Total Profit"]
+
+        print(data.columns.values)
+        # print all headers names from 9 to 20
+        #print(data.loc[: , "Unnamed: 9": "Unnamed: 20"].columns)
+
         data.to_excel("RESULTS-XLSX.xlsx")
         return
         data = ExeclReader.get_col(data, "pass")
-        
+
         data = list(data)
         data.sort()
         print(len(data))
@@ -153,7 +164,7 @@ def start(excel_files):
     for pass_num in res_dict:
         if res_dict[pass_num] == len(excel_files):
             # prits the results on one line
-            #print_row(pass_num)
+            # print_row(pass_num)
             valid_pass_numbers.append(pass_num)
 
     print(valid_pass_numbers)

@@ -1,11 +1,12 @@
 import pandas as pd
 import math
 
+
 columns_map = {
     "pass": "Standard Deviation Passes (Optimization)",
     "std": "Unnamed: 25",
     "total_profit": "Unnamed: 39",
-    
+
 }
 
 
