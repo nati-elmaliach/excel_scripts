@@ -119,12 +119,40 @@ DATA_COLUMNS = ["Pass", "2013", "2014", "2015", "2016", "2017", "2018", "2019", 
 
 def write_to_excel(valid_pass_numbers, excel_data):
     # print(excel_data[list(excel_data.keys())[0]])
-    for broker, data in excel_data.items():
-        # print(type(data))
 
-        data = data[np.isin(data.Pass, valid_pass_numbers)]
-        print(broker)
-        print(data)
+    df_data = None
+
+    for broker, data in excel_data.items():
+        c_data = data.copy()
+        # get only rows that are in valid_pass_numbers
+        c_data = c_data[np.isin(c_data.Pass, valid_pass_numbers)]
+
+        # multiply by 100 to get the value and not percentage
+        c_data["AVG DD"] = c_data["AVG DD"] * 100
+        c_data["HIGH DD"] = c_data["HIGH DD"] * 100
+
+        
+        # add the broker name column
+        df1 = pd.DataFrame([[broker] * len(c_data.columns)],
+                           columns=c_data.columns)
+
+        c_data = df1.append(c_data, ignore_index=True)
+
+        # add empty column
+        df1 = pd.DataFrame([[np.nan] * len(c_data.columns)],
+                           columns=c_data.columns)
+
+        c_data = df1.append(c_data, ignore_index=True)
+
+
+        print(df_data)
+
+        if df_data is None:
+            df_data = c_data
+        else:
+            df_data = c_data.append(df_data, ignore_index=True)
+
+    df_data.to_excel("RESULTS-XLSX.xlsx")
 
 
 def start(excel_files):
