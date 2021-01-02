@@ -1,6 +1,7 @@
 from os import listdir
 from os.path import isfile, join
 import pandas as pd
+import numpy as np
 import math
 import operator
 from itertools import chain
@@ -107,10 +108,29 @@ def print_all_columns_names(data):
     print_row(data.columns.values)
 
 
+def format_value(value):
+    return round(value, 2)
+
+
 # 2
+DATA_COLUMNS = ["Pass", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020",
+                        "Per Year Per Pair", "AVG WINR", "AVG DD", "HIGH DD", "STD", "Profit STD", "P.p (avg)", "P.F(AVG)", "Total Profit"]
+
+
+def write_to_excel(valid_pass_numbers, excel_data):
+    # print(excel_data[list(excel_data.keys())[0]])
+    for broker, data in excel_data.items():
+        # print(type(data))
+
+        data = data[np.isin(data.Pass, valid_pass_numbers)]
+        print(broker)
+        print(data)
+
+
 def start(excel_files):
 
     valid_passes = []
+    excel_data = {}
 
     for excel_file in excel_files:
         print("--------------------------")
@@ -124,28 +144,21 @@ def start(excel_files):
         data = ExeclReader.mid_filter(data, "std", operator.lt)
         data = ExeclReader.mid_filter(data, "total_profit", operator.gt)
 
+        # drop unnecassary columns
         for key, value in columns_to_delete.items():
             data.drop(
                 data.loc[:, key: value].columns, axis=1, inplace=True)
 
-        print(data.columns.values)
-
         #  All new columns names, need to generate first 9 - 20
-        data.columns = ["Pass", "1", "2", "3", "4", "5", "6", "7", "8",
-                        "Per Year Per Pair", "AVG WINR", "AVG DD", "HIGH DD", "STD", "Profit STD" , "P.p (avg)" , "P.F(AVG)" , "Total Profit"]
+        data.columns = DATA_COLUMNS
 
-        print(data.columns.values)
-        # print all headers names from 9 to 20
-        #print(data.loc[: , "Unnamed: 9": "Unnamed: 20"].columns)
+        excel_data[excel_file] = data
 
-        data.to_excel("RESULTS-XLSX.xlsx")
-        return
-        data = ExeclReader.get_col(data, "pass")
-
+        data = ExeclReader.get_col(data, "Pass")
         data = list(data)
         data.sort()
-        print(len(data))
-        return
+        # print(data)
+
         valid_passes.append(data)
         print("--------------------------")
 
@@ -167,7 +180,8 @@ def start(excel_files):
             # print_row(pass_num)
             valid_pass_numbers.append(pass_num)
 
-    print(valid_pass_numbers)
+    print_row(valid_pass_numbers)
+    write_to_excel(valid_pass_numbers, excel_data)
 
 
 # 1

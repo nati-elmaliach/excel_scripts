@@ -3,7 +3,7 @@ import math
 
 
 columns_map = {
-    "pass": "Standard Deviation Passes (Optimization)",
+    "Pass": "Pass",
     "std": "Unnamed: 25",
     "total_profit": "Unnamed: 39",
 
@@ -18,7 +18,7 @@ class ExeclReader:
         dict_pd = pd.read_excel(file_name, sheet_name=None)["STDo"]
 
         # print all columns of this excel file
-        print(dict_pd.columns.values)
+        #print(dict_pd.columns.values)
 
         num_of_rows = dict_pd.shape[0]
 
