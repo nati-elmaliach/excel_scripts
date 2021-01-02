@@ -116,6 +116,8 @@ def format_value(value):
 DATA_COLUMNS = ["Pass", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020",
                         "Per Year Per Pair", "AVG WINR", "AVG DD", "HIGH DD", "STD", "Profit STD", "P.p (avg)", "P.F(AVG)", "Total Profit"]
 
+    
+
 
 def write_to_excel(valid_pass_numbers, excel_data):
     # print(excel_data[list(excel_data.keys())[0]])
@@ -130,6 +132,14 @@ def write_to_excel(valid_pass_numbers, excel_data):
         # multiply by 100 to get the value and not percentage
         c_data["AVG DD"] = c_data["AVG DD"] * 100
         c_data["HIGH DD"] = c_data["HIGH DD"] * 100
+
+        # set 2 decimal points on all values
+        for col in DATA_COLUMNS:
+            c_data[col] = c_data[col].apply(lambda x: round(x, 2))
+
+        # convert to precentage 
+        c_data["AVG DD"] = c_data["AVG DD"].apply(lambda x: str(x) + " %")
+        c_data["HIGH DD"] = c_data["HIGH DD"].apply(lambda x: str(x) + " %")
 
         # add the broker name column
         header_row = [[np.nan] * len(c_data.columns)]
