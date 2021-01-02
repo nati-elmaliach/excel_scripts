@@ -131,9 +131,12 @@ def write_to_excel(valid_pass_numbers, excel_data):
         c_data["AVG DD"] = c_data["AVG DD"] * 100
         c_data["HIGH DD"] = c_data["HIGH DD"] * 100
 
-        
         # add the broker name column
-        df1 = pd.DataFrame([[broker] * len(c_data.columns)],
+        header_row = [[np.nan] * len(c_data.columns)]
+        print(header_row[0])
+        # header_row[0] = broker
+
+        df1 = pd.DataFrame(header_row,
                            columns=c_data.columns)
 
         c_data = df1.append(c_data, ignore_index=True)
@@ -144,15 +147,14 @@ def write_to_excel(valid_pass_numbers, excel_data):
 
         c_data = df1.append(c_data, ignore_index=True)
 
-
-        print(df_data)
+        # print(df_data)
 
         if df_data is None:
             df_data = c_data
         else:
             df_data = c_data.append(df_data, ignore_index=True)
 
-    df_data.to_excel("RESULTS-XLSX.xlsx")
+    df_data.to_excel("RESULTS-XLSX.xlsx", index=False)
 
 
 def start(excel_files):
