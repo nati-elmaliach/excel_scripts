@@ -133,8 +133,8 @@ def write_to_excel(valid_pass_numbers, excel_data):
 
         # add the broker name column
         header_row = [[np.nan] * len(c_data.columns)]
-        print(header_row[0])
-        # header_row[0] = broker
+        header_row[0][1] = broker
+        
 
         df1 = pd.DataFrame(header_row,
                            columns=c_data.columns)
