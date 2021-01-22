@@ -8,7 +8,7 @@ from itertools import chain
 
 
 from ExcelReader.ExcelReader import ExeclReader
-
+LAST_COL_NAME = None
 
 columns_to_delete = {
     "Unnamed: 9": "Unnamed: 20",
@@ -113,10 +113,7 @@ def format_value(value):
 
 
 # 2
-DATA_COLUMNS = ["Pass", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020",
-                        "Per Year Per Pair", "AVG WINR", "AVG DD", "HIGH DD", "STD", "Profit STD", "P.p (avg)", "P.F(AVG)", "Total Profit"]
-
-    
+DATA_COLUMNS = ["Pass"]
 
 
 def write_to_excel(valid_pass_numbers, excel_data):
@@ -126,32 +123,32 @@ def write_to_excel(valid_pass_numbers, excel_data):
 
     for broker, data in excel_data.items():
         c_data = data.copy()
+        
         # get only rows that are in valid_pass_numbers
         c_data = c_data[np.isin(c_data.Pass, valid_pass_numbers)]
 
         # multiply by 100 to get the value and not percentage
-        c_data["AVG DD"] = c_data["AVG DD"] * 100
-        c_data["HIGH DD"] = c_data["HIGH DD"] * 100
+        # c_data["AVG DD"] = c_data["AVG DD"] * 100
+        # c_data["HIGH DD"] = c_data["HIGH DD"] * 100
 
-        # set 2 decimal points on all values
-        for col in DATA_COLUMNS:
-            c_data[col] = c_data[col].apply(lambda x: round(x, 2))
+        # # set 2 decimal points on all values
+        # for col in DATA_COLUMNS:
+        #     c_data[col] = c_data[col].apply(lambda x: round(x, 2))
 
-        # convert to precentage 
-        c_data["AVG DD"] = c_data["AVG DD"].apply(lambda x: str(x) + " %")
-        c_data["HIGH DD"] = c_data["HIGH DD"].apply(lambda x: str(x) + " %")
+        # # convert to precentage
+        # c_data["AVG DD"] = c_data["AVG DD"].apply(lambda x: str(x) + " %")
+        # c_data["HIGH DD"] = c_data["HIGH DD"].apply(lambda x: str(x) + " %")
 
         # add the broker name column
         header_row = [[np.nan] * len(c_data.columns)]
-        header_row[0][1] = broker
-        
+        header_row[0][0] = broker
 
         df1 = pd.DataFrame(header_row,
                            columns=c_data.columns)
 
         c_data = df1.append(c_data, ignore_index=True)
 
-        # add empty column
+        # add empty row
         df1 = pd.DataFrame([[np.nan] * len(c_data.columns)],
                            columns=c_data.columns)
 
@@ -177,17 +174,16 @@ def start(excel_files):
         print(excel_file)
         print("--------------------------")
 
-        data = ExeclReader.get_df(excel_file)
-        # print_all_columns_names(data)
+        data, last_col = ExeclReader.get_df(excel_file)
 
-        data = ExeclReader.filter(data, "total_profit", operator.gt, 0)
-        data = ExeclReader.mid_filter(data, "std", operator.lt)
-        data = ExeclReader.mid_filter(data, "total_profit", operator.gt)
+        data = ExeclReader.filter(data, last_col, operator.gt, 0)
+        data = ExeclReader.mid_filter(data, "Unnamed: 25", operator.lt)
+        data = ExeclReader.mid_filter(data, last_col, operator.gt)
 
         # drop unnecassary columns
-        for key, value in columns_to_delete.items():
-            data.drop(
-                data.loc[:, key: value].columns, axis=1, inplace=True)
+        # for key, value in columns_to_delete.items():
+        data.drop(
+            data.loc[:, 'Unnamed: 1': last_col].columns, axis=1, inplace=True)
 
         #  All new columns names, need to generate first 9 - 20
         data.columns = DATA_COLUMNS
@@ -221,6 +217,8 @@ def start(excel_files):
             valid_pass_numbers.append(pass_num)
 
     print_row(valid_pass_numbers)
+    #print_row(excel_data)
+    
     write_to_excel(valid_pass_numbers, excel_data)
 
 
@@ -237,7 +235,7 @@ def get_all_excels(files_list):
 def main():
     all_files = [f for f in listdir("./") if isfile(join("./", f))]
     excel_files = get_all_excels(all_files)
-    print(excel_files)
+
     start(excel_files)
 
 
